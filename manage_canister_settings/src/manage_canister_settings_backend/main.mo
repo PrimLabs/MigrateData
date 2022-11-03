@@ -75,13 +75,13 @@ shared(installer) actor class manage_canister_settings()  = this {
         } -> async ();
     };
 
-    public shared({caller}) func updateControllers(canisterId: Principal): async Bool {
+    public shared({caller}) func updateControllers(canisterId: Principal, controller: Principal): async Bool {
         let managementCanister: Management = actor("aaaaa-aa");
         await managementCanister.update_settings({
             canister_id = canisterId;
             settings = {
                 freezing_threshold = null;
-                controllers = ?[Principal.fromText("hjpa3-qyaaa-aaaan-qagva-cai")];
+                controllers = ?[controller];
                 memory_allocation = null;
                 compute_allocation = null;
             }
