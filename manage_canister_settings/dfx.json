@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "canisters": {
+    "manage_canister_settings": {
+      "type": "motoko",
+      "main": "src/manage_canister_settings_backend/main.mo"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "",
+      "args": ""
+    }
+  }
+}
