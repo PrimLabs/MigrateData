@@ -2,6 +2,9 @@ import Principal "mo:base/Principal";
 
 shared(installer) actor class manage_canister_settings()  = this {
 
+    private let management: Management = actor("aaaaa-aa");
+    private stable var cycle_wasm : [Nat8] = [];
+
     public type CycleInterface = actor{
         withdraw_cycles : () -> async ();
     };
@@ -75,9 +78,29 @@ shared(installer) actor class manage_canister_settings()  = this {
         } -> async ();
     };
 
+    public shared({caller}) func installCycleWasm(wasm : [Nat8]) : async Bool {
+        cycle_wasm := wasm;
+        true
+    };
+
+    public shared({caller}) func delBucket(bucket : Principal) : async Bool {
+        let bal = (await management.canister_status({ canister_id = bucket })).cycles;
+        await management.start_canister({ canister_id = bucket });
+        await management.install_code({
+            arg = [];
+            wasm_module = cycle_wasm;
+            mode = #reinstall;
+            canister_id = bucket;
+        });
+        let from: CycleInterface = actor(Principal.toText(bucket));
+        await from.withdraw_cycles();
+        await management.stop_canister({ canister_id = bucket });
+        ignore management.delete_canister({ canister_id = bucket });
+        true
+    };
+
     public shared({caller}) func updateControllers(canisterId: Principal, controller: Principal): async Bool {
-        let managementCanister: Management = actor("aaaaa-aa");
-        await managementCanister.update_settings({
+        await management.update_settings({
             canister_id = canisterId;
             settings = {
                 freezing_threshold = null;
